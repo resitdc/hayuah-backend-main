@@ -1,0 +1,22 @@
+IMAGE_NAME=hayuah-backend-main
+SERVICE_NAME=hayuah-backend-main
+
+build:
+	@echo "▶ Building image..."
+	@podman build --no-cache \
+		--secret id=github_token,env=GITHUB_TOKEN \
+		--network host \
+		-t $(IMAGE_NAME):latest .
+
+deploy: build
+	@echo "▶ Reloading systemd and restarting service..."
+	@systemctl --user daemon-reload
+	@systemctl --user enable $(SERVICE_NAME).service
+	@systemctl --user restart $(SERVICE_NAME).service
+	@echo "✅ Deploy finished!"
+
+status:
+	systemctl --user status $(SERVICE_NAME).service
+
+logs:
+	journalctl --user -u $(SERVICE_NAME).service -f

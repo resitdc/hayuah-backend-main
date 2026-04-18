@@ -1,0 +1,62 @@
+{
+  "compilerOptions": {
+    // "ignoreDeprecations": "6.0",
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@root/*": [
+        "*"
+      ],
+      "@src/*": [
+        "src/*"
+      ],
+      "@routes/*": [
+        "src/routes/*"
+      ],
+      "@middlewares/*": [
+        "src/middlewares/*"
+      ],
+      "@controllers/*": [
+        "src/controllers/*"
+      ],
+      "@models/*": [
+        "src/models/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@plugins/*": [
+        "src/plugins/*"
+      ],
+      "@dataTypes/*": [
+        "src/dataTypes/*"
+      ],
+      "@services/*": [
+        "src/services/*"
+      ],
+      "@cache/*": [
+        "src/cache/*"
+      ]
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types" 
+    ]
+  },
+  "ts-node": {
+    "files": true,
+    "transpileOnly": true 
+  },
+  "exclude": ["node_modules", "dist"]
+}
