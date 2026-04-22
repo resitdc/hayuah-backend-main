@@ -13,20 +13,24 @@ export const findAllGuests = async (
   res: Response,
   next: NextFunction
 ) => {
+  const { eventId } = req.params;
   try {
     const query = req.query as any;
     const options = {
       limit: parseInt(query.limit, 10) || 10,
       page: parseInt(query.page, 10) || 1,
-      event_id: query.event_id,
       search: query.search,
       is_partner: query.is_partner !== undefined ? query.is_partner === "true" : undefined,
       is_vip: query.is_vip !== undefined ? query.is_vip === "true" : undefined,
       sort: query.sort,
       withCheckins: query.withCheckins === "true",
+      isFulldata: query.isFulldata === "true"
     };
 
-    const data = await guestsService.findAll(options);
+    const data = await guestsService.findAll({
+      event_id: eventId,
+      ...options
+    });
     successListResponse(res, 200, data.results, data.total, options.limit, options.page);
   } catch (error) {
     next(error);
@@ -39,10 +43,15 @@ export const findGuestById = async (
   next: NextFunction
 ) => {
   try {
-    const id = req.params.id;
+    const { eventId, id } = req.params;
+    console.log("req.params ==", req.params);
     const query = req.query as any;
-    
-    const data = await guestsService.findOne(id, query.withCheckins === "true");
+
+    const data = await guestsService.findOne(
+      eventId,
+      id,
+      query.withCheckins === "true"
+    );
 
     successResponse(res, 200, data);
   } catch (error) {
@@ -113,8 +122,8 @@ export const checkInGuest = async (
   const trx = await Model.startTransaction();
   try {
     const payload = {
-      guest_id: req.body.guest_id,
-      checkin_type: req.body.checkin_type || "SCAN",
+      guest_id: req.body.guestId,
+      checkin_type: req.body.checkinType || "SCAN",
     };
 
     const newCheckin = await guestsService.checkIn(payload, trx);

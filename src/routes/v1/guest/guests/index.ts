@@ -19,13 +19,13 @@ import {
   checkInGuestSchema,
 } from "@controllers/guest/guests/validation";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
-router.post("/checkin", requireAuth, validateBody(checkInGuestSchema), checkInGuest);
-router.get("/", requireAuth, validateQuery(findAllGuestsSchema), findAllGuests);
-router.get("/:id", requireAuth, validateParams(guestIdSchema), findGuestById);
-router.post("/", requireAuth, validateBody(createGuestSchema), createGuest);
-router.patch("/:id", requireAuth, validateParams(guestIdSchema), validateBody(updateGuestSchema), updateGuest);
-router.delete("/:id", requireAuth, validateParams(guestIdSchema), deleteGuest);
+router.post("/checkin", validateBody(checkInGuestSchema), checkInGuest);
+router.get("/:eventId", validateQuery(findAllGuestsSchema), findAllGuests);
+router.get("/:eventId/:id", validateParams(guestIdSchema), findGuestById);
+router.post("/:eventId", validateBody(createGuestSchema), createGuest);
+router.patch("/:eventId/:id", validateParams(guestIdSchema), validateBody(updateGuestSchema), updateGuest);
+router.delete("/:eventId/:id", validateParams(guestIdSchema), deleteGuest);
 
 export default router;

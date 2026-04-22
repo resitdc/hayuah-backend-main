@@ -19,6 +19,7 @@ interface FindAllGuestsOptions {
   is_vip?: boolean;
   sort?: string;
   withCheckins?: boolean;
+  isFulldata?: boolean;
 }
 
 interface GuestCheckInInput {
@@ -36,29 +37,54 @@ export class GuestsService {
     is_vip,
     sort,
     withCheckins,
+    isFulldata,
   }: FindAllGuestsOptions): Promise<Page<guest.Guests>> {
-    let query = guest.Guests.query();
+    let selectData: string[] = [
+      "guests.id",
+      "guests.name",
+      "guests.email",
+      "guests.whatsapp",
+      "guests.qrcode",
+      "guests.is_vip",
+    ];
+
+    if (isFulldata) {
+      selectData = [
+        ...selectData,
+        "guests.event_id",
+        "guests.instagram",
+        "guests.is_partner",
+        "guests.avatar",
+        "guests.is_print",
+        "guests.created_at",
+        "guests.updated_at",
+        "events.title",
+        "events.event_date"
+      ]
+    }
+
+    let query = guest.Guests.query().select(selectData);
 
     if (event_id) {
-      query = query.where("event_id", event_id);
+      query = query.where("guests.event_id", event_id);
     }
 
     if (search) {
       query = query.where((builder) => {
         builder
-          .where("name", "ilike", `%${search}%`)
-          .orWhere("email", "ilike", `%${search}%`)
-          .orWhere("whatsapp", "ilike", `%${search}%`)
-          .orWhere("instagram", "ilike", `%${search}%`);
+          .where("guests.name", "ilike", `%${search}%`)
+          .orWhere("guests.email", "ilike", `%${search}%`)
+          .orWhere("guests.whatsapp", "ilike", `%${search}%`)
+          .orWhere("guests.instagram", "ilike", `%${search}%`);
       });
     }
 
-    if (is_partner !== undefined) query = query.where("is_partner", is_partner);
-    if (is_vip !== undefined) query = query.where("is_vip", is_vip);
+    if (is_partner !== undefined) query = query.where("guests.is_partner", is_partner);
+    if (is_vip !== undefined) query = query.where("guests.is_vip", is_vip);
 
     if (sort) {
       const [column, direction] = sort.split(":");
-      const allowedSortColumns = ["name", "created_at", "is_vip"];
+      const allowedSortColumns = ["guests.name", "guests.created_at", "guests.is_vip"];
       if (
         allowedSortColumns.includes(column) &&
         ["asc", "desc"].includes(direction.toLowerCase())
@@ -66,7 +92,7 @@ export class GuestsService {
         query = query.orderBy(column, direction.toUpperCase() as "ASC" | "DESC");
       }
     } else {
-      query = query.orderBy("created_at", "DESC");
+      query = query.orderBy("guests.created_at", "DESC");
     }
 
     const eagerGraph: Record<string, any> = {};
@@ -75,13 +101,18 @@ export class GuestsService {
     if (Object.keys(eagerGraph).length > 0) {
       query = query.withGraphFetched(eagerGraph);
     }
-
+    
+    query = query.leftJoin("project.events", "events.id", "guests.event_id");
     const guestsPage = await query.page(page - 1, limit);
     return guestsPage;
   }
 
-  async findOne(id: string, withCheckins: boolean = false): Promise<guest.Guests> {
-    let query = guest.Guests.query().findById(id);
+  async findOne(
+    eventId: string,
+    id: string,
+    withCheckins: boolean = false
+  ): Promise<guest.Guests> {
+    let query = guest.Guests.query().findById(id).andWhere("event_id", eventId);
 
     if (withCheckins) {
       query = query.withGraphFetched("checkins");
@@ -136,7 +167,14 @@ export class GuestsService {
   }
 
   async checkIn(data: GuestCheckInInput, trx?: Transaction): Promise<guest.GuestCheckins> {
-    const existingGuest = await guest.Guests.query(trx).findById(data.guest_id);
+    const existingGuest = await guest.Guests.query(trx).select(
+      "id",
+      "name",
+      "is_vip",
+      "whatsapp",
+      "email",
+      "instagram"
+    ).findById(data.guest_id);
     if (!existingGuest) {
       throw new NotFoundError(`Guest with ID ${data.guest_id} not found`);
     }
@@ -151,8 +189,10 @@ export class GuestsService {
         checkin_type: data.checkin_type,
       })
       .returning("*");
+      
+    const result = Object.assign(newCheckin, { guest: existingGuest });
 
-    return newCheckin;
+    return result;
   }
 }
 

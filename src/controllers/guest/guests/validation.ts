@@ -18,6 +18,7 @@ export const findAllGuestsSchema = Joi.object({
 
 export const guestIdSchema = Joi.object({
   id: Joi.string().max(200).required().label("Guest ID"), 
+  eventId: Joi.string().required().label("Event ID"), 
 });
 
 export const createGuestSchema = Joi.object({
@@ -50,8 +51,8 @@ export const updateGuestSchema = Joi.object({
   .label("Update Guest Data");
 
 export const checkInGuestSchema = Joi.object({
-  guest_id: Joi.string().max(200).required().label("Guest ID"),
-  checkin_type: Joi.string()
+  guestId: Joi.string().max(200).required().label("Guest ID"),
+  checkinType: Joi.string()
     .valid(...validCheckinTypes)
     .default("SCAN")
     .label("Check-In Type"),
