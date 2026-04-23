@@ -39,31 +39,9 @@ app.use(express.urlencoded({ extended: true }));
 //   credentials: true
 // }));
 app.use(cors({
-  origin(origin, callback) {
-    if (!origin) return callback(null, true);
-
-    try {
-      const url = new URL(origin);
-      const host = url.hostname;
-
-      if (["localhost", "127.0.0.1"].includes(host)) {
-        return callback(null, true);
-      }
-
-      if (
-        host === BASE_DOMAIN ||
-        host.endsWith("." + BASE_DOMAIN)
-      ) {
-        return callback(null, true);
-      }
-    } catch (e) {
-      console.error("CORS Error parsing:", e);
-    }
-
-    return callback(new Error("CORS blocked"), false);
-  },
-  credentials: true
+  origin: true, 
 }));
+
 initializeModels(knex);
 
 app.use("/api/v1", routesV1);
