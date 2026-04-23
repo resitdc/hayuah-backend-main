@@ -3,6 +3,15 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 COPY .npmrc.build .npmrc 
 RUN npm install -g pnpm
+
+RUN --mount=type=secret,id=npm_token \
+  export NPM_TOKEN=$(cat /run/secrets/npm_token) && \
+  echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && \
+  echo "@resitdc:registry=https://npm.pkg.github.com" >> .npmrc && \
+  echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" >> .npmrc && \
+  pnpm install --frozen-lockfile && \
+  rm -f .npmrc
+  
 RUN pnpm install --frozen-lockfile
 RUN rm .npmrc
 
