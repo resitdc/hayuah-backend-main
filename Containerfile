@@ -1,7 +1,6 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-COPY .npmrc.build .npmrc 
 RUN npm install -g pnpm
 
 RUN --mount=type=secret,id=npm_token \
