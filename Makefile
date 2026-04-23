@@ -15,7 +15,7 @@ endif
 build:
 	@echo "▶ Building image for $(ENV)..."
 	@podman build --no-cache \
-		--secret id=github_token,env=GITHUB_TOKEN \
+		--secret id=npm_token,env=NPM_TOKEN \
 		--network host \
 		-t $(IMAGE_NAME):latest .
 
