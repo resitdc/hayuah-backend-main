@@ -8,6 +8,15 @@ type CreateGuestInput = Omit<
   "created_at" | "updated_at"
 >;
 
+interface GuestDataMinimum {
+  id: string;
+  name: string;
+  is_vip: string;
+  whatsapp: string;
+  email: string;
+  instagram: string;
+};
+
 type UpdateGuestInput = Partial<CreateGuestInput>;
 
 interface FindAllGuestsOptions {
@@ -166,7 +175,7 @@ export class GuestsService {
     return { message: `Guest with ID ${id} has been deleted successfully` };
   }
 
-  async checkIn(data: GuestCheckInInput, trx?: Transaction): Promise<guest.GuestCheckins> {
+  async checkIn(data: GuestCheckInInput, trx?: Transaction): Promise<guest.GuestCheckins & { guest: any | GuestDataMinimum }> {
     const existingGuest = await guest.Guests.query(trx).select(
       "id",
       "name",
@@ -189,7 +198,7 @@ export class GuestsService {
         checkin_type: data.checkin_type,
       })
       .returning("*");
-      
+
     const result = Object.assign(newCheckin, { guest: existingGuest });
 
     return result;

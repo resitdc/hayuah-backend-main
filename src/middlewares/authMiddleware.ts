@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { errorResponseOld } from "@utils/response";
 import dotenv from "dotenv";
-import { revokedJtiCache } from "@cache/revokedJti.cache";
-import { userStatusCache } from "@cache/userStatus.cache";
+// import { revokedJtiCache } from "@cache/revokedJti.cache";
+// import { userStatusCache } from "@cache/userStatus.cache";
 import { user as userSchema } from "@resitdc/hayuah-models";
 import knex from "@config/connection";
 import { isAccessTokenPayload } from "@utils/jwt";
@@ -47,10 +47,10 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     if (!payload.sub || !payload.jti)
       return res.status(401).json(errorResponseOld("INVALID TOKEN"));
 
-    //#region - IN-MEMORY REVOKE
-    if (revokedJtiCache.get(payload.jti))
-      return res.status(401).json(errorResponseOld("TOKEN REVOKED"));
-    //#endregion - IN-MEMORY REVOKE
+    // //#region - IN-MEMORY REVOKE
+    // if (revokedJtiCache.get(payload.jti))
+    //   return res.status(401).json(errorResponseOld("TOKEN REVOKED"));
+    // //#endregion - IN-MEMORY REVOKE
 
     //#region - FALLBACK: POSTGRES
     const revoked = await userSchema.AuthRevokedJti.query()
@@ -59,10 +59,10 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       .first();
     //#endregion - FALLBACK: POSTGRES
 
-    if (revoked) {
-      revokedJtiCache.set(payload.jti, true);
-      return res.status(401).json(errorResponseOld("TOKEN REVOKED"));
-    }
+    // if (revoked) {
+    //   revokedJtiCache.set(payload.jti, true);
+    //   return res.status(401).json(errorResponseOld("TOKEN REVOKED"));
+    // }
 
     //#region - USER STATUS CACHE
     const cachedStatus = userStatusCache.get(payload.sub);

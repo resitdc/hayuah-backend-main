@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import guestsService from "@services/guests/guests.service";
 import { successResponse, successListResponse } from "@utils/response";
 import { Model } from "objection";
+import { sendTemplateMessage } from "@whatsapp/instance";
 
 interface RequestWithUser extends Request {
   user?: any;
@@ -129,6 +130,37 @@ export const checkInGuest = async (
     const newCheckin = await guestsService.checkIn(payload, trx);
     await trx.commit();
     
+    if (newCheckin?.guest?.whatsapp && newCheckin?.guest?.name) {
+      await sendTemplateMessage(newCheckin.guest.whatsapp, {
+        "name": "thanks_wedding",
+        "language": {
+          "code": "EN"
+        },
+        "components": [
+          {
+            "type": "header",
+            "parameters": [
+              {
+                "type": "image",
+                "image": {
+                  "link": "https://drive.gamaloka.com/bacod/rs.png"
+                }
+              }
+            ]
+          },
+          {
+            "type": "body",
+            "parameters": [
+              {
+                "type": "text",
+                "text": newCheckin.guest.name
+              }
+            ]
+          }
+        ]
+      });
+    }
+
     successResponse(res, 200, newCheckin, "Guest checked in successfully");
   } catch (error) {
     await trx.rollback();

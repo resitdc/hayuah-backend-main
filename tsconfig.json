@@ -45,8 +45,8 @@
       "@services/*": [
         "src/services/*"
       ],
-      "@cache/*": [
-        "src/cache/*"
+      "@whatsapp/*": [
+        "src/whatsapp/*"
       ]
     },
     "typeRoots": [

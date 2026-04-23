@@ -8,7 +8,6 @@ RUN rm .npmrc
 
 COPY . .
 RUN pnpm build
-RUN cp -r src/emailTemplates dist/src/emailTemplates
 
 FROM node:20-slim
 WORKDIR /app
@@ -17,6 +16,6 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/dist ./dist
 
-EXPOSE 4002
+EXPOSE 10001
 
 CMD ["npm", "run", "prod:start"] 
