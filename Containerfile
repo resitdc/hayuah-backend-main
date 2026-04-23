@@ -11,9 +11,6 @@ RUN --mount=type=secret,id=npm_token \
   echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" >> .npmrc && \
   pnpm install --frozen-lockfile && \
   rm -f .npmrc
-  
-RUN pnpm install --frozen-lockfile
-RUN rm .npmrc
 
 COPY . .
 RUN pnpm build
